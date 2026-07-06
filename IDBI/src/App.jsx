@@ -151,6 +151,162 @@ export default function App() {
   const [selectedLead, setSelectedLead] = useState(INITIAL_LEADS[0]);
   const [filterAffinity, setFilterAffinity] = useState('All');
   
+  // Auto-Demo States
+  const [isDemoRunning, setIsDemoRunning] = useState(false);
+
+  // Audio narration function using Web Speech Synthesis API
+  const speakText = (text, callback) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // stop current narration
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      const englishVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
+      if (englishVoice) utterance.voice = englishVoice;
+      utterance.rate = 1.0;
+      utterance.onend = () => { if (callback) callback(); };
+      window.speechSynthesis.speak(utterance);
+    } else {
+      console.log("Speech Synthesis not supported: ", text);
+    }
+  };
+
+  // Auto-Demo Tour Effect (3-minute automated flow)
+  useEffect(() => {
+    if (!isDemoRunning) {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      return;
+    }
+
+    const steps = [
+      {
+        action: () => {
+          setActiveTab('dashboard');
+          setSelectedLead(INITIAL_LEADS[0]); // Select Sweta Pilla
+        },
+        speech: "Welcome to the IDBI Smart Lending Copilot guided audio tour. We are currently looking at the Relationship Manager Console. Here, customer leads are prioritized dynamically based on live transactional features and conversion probability, rather than static CIBIL files. For example, Sweta Pilla is bubbled up as a hot lead with an AI score of 94.",
+        duration: 18000
+      },
+      {
+        action: () => {
+          // Keep showing selection
+        },
+        speech: "On the right details panel, the system extracts key metrics like salary confidence and calculates a precise maximum safe monthly EMI. It also generates an explainable credit audit rationale that complies with digital lending rules.",
+        duration: 14000
+      },
+      {
+        action: () => {
+          setActiveTab('whatsapp');
+          setWhatsappChat([
+            { sender: 'bot', text: "Hi Sweta, based on your premium banking relationship with IDBI Bank, you are eligible for an instant pre-qualified Personal Loan up to ₹8 Lakh. Would you like to check your eligibility in under 2 minutes?", hasButtons: true }
+          ]);
+          setChatStep(0);
+        },
+        speech: "Next, we switch to the WhatsApp Lending Assistant. This simulated smartphone UI acts as the hero customer outreach channel. By replacing complex loan files with simple conversational clicks, it pushes conversion rates over 30 percent.",
+        duration: 16000
+      },
+      {
+        action: () => {
+          // Simulate clicking eligibility
+          setWhatsappChat(prev => [...prev, { sender: 'customer', text: '✅ Check Eligibility' }]);
+          setChatStep(1);
+          setTimeout(() => {
+            setWhatsappChat(prev => [...prev, {
+              sender: 'bot',
+              text: "Great! Let's get started. Please select the primary purpose of your loan:",
+              customOptions: ["🏡 Home Renovation", "🚗 Vehicle Purchase", "🎓 Education", "💼 Debt Consolidation"]
+            }]);
+          }, 1500);
+        },
+        speech: "The bot automatically prompts the customer for their loan purpose, net salary, and desired terms, and accepts direct bank statement uploads parsed via Document AI OCR.",
+        duration: 15000
+      },
+      {
+        action: () => {
+          // Simulate salary confirm
+          setWhatsappChat(prev => [...prev, { sender: 'customer', text: 'Yes, ₹1,20,000' }]);
+          setChatStep(2);
+          setTimeout(() => {
+            setWhatsappChat(prev => [...prev, {
+              sender: 'bot',
+              text: "Thank you. Analyzing transaction history... ⚡\n\nBased on your monthly inflows of ₹1,20,000 and low existing credit limits, your pre-approved limit is *₹8,00,000*. Your safe EMI is *₹15,000/month*.\n\nWould you like to upload your bank statement to unlock a higher limit?",
+              customOptions: ["📄 Upload Documents", "📞 Talk to Advisor", "✅ Accept Offer"]
+            }]);
+          }, 1500);
+        },
+        speech: "Based on the input salary and historical checks, the system computes the eligibility range and displays the offer instantly in the chat window, ready for user acceptance.",
+        duration: 16000
+      },
+      {
+        action: () => {
+          setActiveTab('calculator');
+        },
+        speech: "Now, let's look at the Repayment Capacity Engine. This modeling interface allows credit analysts and branch managers to adjust customer transactions dynamically.",
+        duration: 12000
+      },
+      {
+        action: () => {
+          // Animate sliders
+          setCalcSalary(140000);
+          setCalcRent(25000);
+          setCalcEmi(10000);
+        },
+        speech: "As we modify parameters, the calculation panel applies vacancy haircuts to rental inflows and margin haircuts to business turnovers, recalculating the net disposable buffer, debt-to-income limits, and compliance explainability summaries in real-time.",
+        duration: 18000
+      },
+      {
+        action: () => {
+          setActiveTab('campaign');
+          setTargetSegment('Mumbai-based salaried professionals with CIBIL > 740 and no active Home Loans');
+          setGeneratedCampaign(null);
+        },
+        speech: "Finally, we visit the Omnichannel Campaign Builder. Here, our marketing team can input natural language segments to instantly generate copy.",
+        duration: 13000
+      },
+      {
+        action: () => {
+          // Generate
+          const whatsapp = `*IDBI BANK Smart lending* 💼\n\nHi Sweta, unlock a pre-approved Personal Loan up to *₹8,00,000* at a special interest rate starting at *10.5% p.a.* \n\nCheck eligibility instantly here:\n👉 {{Eligibility_Link}}`;
+          const sms = `IDBI Bank: Hi Sweta, you are pre-qualified for a Personal Loan up to Rs 8 Lakhs. Check eligibility instantly: {{Link}}`;
+          const email = `Subject: Pre-Qualified Loan Offer: Unlock up to Rs 8,00,000 instantly with IDBI Bank\n\nDear Sweta,\n\nBased on your valued banking relationship, we are pleased to offer you a pre-qualified Personal Loan...\n\nWarm regards,\nRetail Lending Division\nIDBI Bank Ltd.`;
+          const ivr = `[IVR Audio Transcript] "Hello! You have a pre-approved loan offer of up to 8 Lakh rupees waiting at IDBI Bank..."`;
+          const voice = `[Voice Bot Script] "Hi Sweta, I'm calling from IDBI Bank. I noticed that you're eligible for a pre-qualified loan..."`;
+          setGeneratedCampaign({ whatsapp, sms, email, ivr, voice });
+        },
+        speech: "Gemini models immediately output compliance-approved copy for WhatsApp, SMS, Email, and Voice scripts, and support regional localizations.",
+        duration: 14000
+      },
+      {
+        action: () => {
+          setIsDemoRunning(false);
+          setActiveTab('dashboard');
+        },
+        speech: "This concludes our guided audio tour of the IDBI Smart Lending Copilot. You can now test the interactive tabs, drag the repayment sliders, or trigger WhatsApp simulations yourself. Thank you for listening!",
+        duration: 14000
+      }
+    ];
+
+    let currentTimeout;
+    const runStep = (idx) => {
+      if (idx >= steps.length) {
+        setIsDemoRunning(false);
+        return;
+      }
+      const current = steps[idx];
+      current.action();
+      speakText(current.speech);
+      currentTimeout = setTimeout(() => {
+        runStep(idx + 1);
+      }, current.duration);
+    };
+
+    runStep(0);
+
+    return () => {
+      clearTimeout(currentTimeout);
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    };
+  }, [isDemoRunning]);
+  
   // WhatsApp Simulator States
   const [whatsappChat, setWhatsappChat] = useState([
     { sender: 'bot', text: "Hi Sweta, based on your premium banking relationship with IDBI Bank, you are eligible for an instant pre-qualified Personal Loan up to ₹8 Lakh. Would you like to check your eligibility in under 2 minutes?", hasButtons: true }
@@ -380,6 +536,21 @@ export default function App() {
           <p>AI-Powered Lending & CRM Relationship Intelligence Platform</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button 
+            className={`btn ${isDemoRunning ? 'btn-danger' : 'btn-primary'}`}
+            onClick={() => setIsDemoRunning(!isDemoRunning)}
+            style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            {isDemoRunning ? (
+              <>
+                <X size={16} /> Stop Auto-Demo
+              </>
+            ) : (
+              <>
+                <span>▶️</span> Start Auto-Demo (Audio)
+              </>
+            )}
+          </button>
           <button 
             className="theme-toggle-btn" 
             onClick={() => setIsDarkMode(!isDarkMode)}
