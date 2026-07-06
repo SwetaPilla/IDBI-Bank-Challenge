@@ -13,7 +13,7 @@ import ReactECharts from 'echarts-for-react';
 const INITIAL_LEADS = [
   {
     id: "IDBI-L-9843",
-    name: "Rahul Sharma",
+    name: "Sweta Pilla",
     age: 32,
     location: "Mumbai, MH",
     occupation: "Salaried (IT Project Manager)",
@@ -153,7 +153,7 @@ export default function App() {
   
   // WhatsApp Simulator States
   const [whatsappChat, setWhatsappChat] = useState([
-    { sender: 'bot', text: "Hi Rahul, based on your premium banking relationship with IDBI Bank, you are eligible for an instant pre-qualified Personal Loan up to ₹8 Lakh. Would you like to check your eligibility in under 2 minutes?", hasButtons: true }
+    { sender: 'bot', text: "Hi Sweta, based on your premium banking relationship with IDBI Bank, you are eligible for an instant pre-qualified Personal Loan up to ₹8 Lakh. Would you like to check your eligibility in under 2 minutes?", hasButtons: true }
   ]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -744,7 +744,7 @@ export default function App() {
               style={{ width: '100%', marginTop: '1rem' }}
               onClick={() => {
                 setWhatsappChat([
-                  { sender: 'bot', text: "Hi Rahul, based on your premium banking relationship with IDBI Bank, you are eligible for an instant pre-qualified Personal Loan up to ₹8 Lakh. Would you like to check your eligibility in under 2 minutes?", hasButtons: true }
+                  { sender: 'bot', text: "Hi Sweta, based on your premium banking relationship with IDBI Bank, you are eligible for an instant pre-qualified Personal Loan up to ₹8 Lakh. Would you like to check your eligibility in under 2 minutes?", hasButtons: true }
                 ]);
                 setChatStep(0);
               }}
